@@ -27,7 +27,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
@@ -41,49 +43,6 @@ const (
 )
 
 var Db *sqlx.DB
-
-type Item struct {
-	Itemid       int
-	Newsid       string
-	Docid        string
-	Title        string
-	Newstate     string
-	Edit_type    int
-	Description  string
-	Source       string
-	Body         string
-	Mediaid      string
-	Type         int
-	Bigimg       string
-	Inner_source string
-	From_url_md5 string
-	Vulgar       int
-	Only         int
-	Ctime        int
-	From         string
-	Httpsurl     string
-	Urllocal     string
-	Url3g        string
-	Editor       string
-	Imgs         string
-	Publishtime  int
-	Cate1        string
-	Cate2        string
-	Cate3        string
-	Original     int
-	Level        string
-	Author       string
-	Check_status int
-	Expire       int
-	Region       string
-	Status       int
-	Mediatype    int
-	Startkey     string
-	Dg_item_tag  string
-	Dg_item_cate string
-	Create_time  string
-	Update_time  string
-}
 
 // cmsCmd represents the cms command
 var cmsCmd = &cobra.Command{
@@ -148,7 +107,31 @@ func loadStartKey() int {
 }
 
 // getItemByApi 通过api获取items数据
-func getItemByApi() {
+func getItemByApi(startKey int, offset int) []NewsI{
+	items := make([]NewsI, 0)
+	url := fmt.Sprintf("%s/query/getList?startKey=%d&offset=%d", Url,startKey,offset)
+	fmt.Println(url)
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("request list error ", err)
+		return items
+	}
+	defer resp.Body.Close()
+	
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("read body error ", err)
+		return items
+	}
+	
+	itemList := NewsList{}
+	err = json.Unmarshal([]byte(body), &itemList)
+	if err != nil {
+		fmt.Println("error is %v\n", err)
+	} 
+
+	fmt.Println(itemList)
+	return items
 
 }
 
@@ -167,7 +150,7 @@ func writeMysql() {
 	if Db == nil {
 		Db = connect()
 	}
-	var items []Item
+	var items []NewsM
 	err := Db.Select(&items, "select * from item_wifi_news_info_rt limit 10")
 	if err != nil {
 		fmt.Println("Select error", err)
@@ -197,7 +180,7 @@ func syncNewsMysql() {
 	fmt.Println(startKey)
 
 	// 获取数据
-	//getItemByApi()
+	getItemByApi(startKey,4)
 
 	// 写入mysql数据库
 	writeMysql()
