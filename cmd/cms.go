@@ -23,13 +23,14 @@ package cmd
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"net/http"
-	"io/ioutil"
-	"encoding/json"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
@@ -107,9 +108,9 @@ func loadStartKey() int {
 }
 
 // getItemByApi 通过api获取items数据
-func getItemByApi(startKey int, offset int) []NewsI{
+func getItemByApi(startKey int, offset int) []NewsI {
 	items := make([]NewsI, 0)
-	url := fmt.Sprintf("%s/query/getList?startKey=%d&offset=%d", Url,startKey,offset)
+	url := fmt.Sprintf("%s/query/getList?startKey=%d&offset=%d", Url, startKey, offset)
 	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -117,18 +118,18 @@ func getItemByApi(startKey int, offset int) []NewsI{
 		return items
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("read body error ", err)
 		return items
 	}
-	
+
 	itemList := NewsList{}
 	err = json.Unmarshal([]byte(body), &itemList)
 	if err != nil {
 		fmt.Println("error is %v\n", err)
-	} 
+	}
 
 	fmt.Println(itemList)
 	return items
@@ -180,7 +181,7 @@ func syncNewsMysql() {
 	fmt.Println(startKey)
 
 	// 获取数据
-	getItemByApi(startKey,4)
+	getItemByApi(startKey, 4)
 
 	// 写入mysql数据库
 	writeMysql()
