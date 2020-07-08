@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -68,6 +69,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// cmsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// 日志
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
 }
 
 // loadStartKey
@@ -128,7 +133,23 @@ func getItemByApi(startKey int, offset int) []NewsI {
 	itemList := NewsList{}
 	err = json.Unmarshal([]byte(body), &itemList)
 	if err != nil {
-		fmt.Println("error is %v\n", err)
+		fmt.Printf("error is %v\n", err)
+		return items
+	}
+
+	for _, info := range itemList {
+		docID := info.DocID
+		newsID := 0
+		switch info.NewsState {
+		case "online":
+			newsID = info.Id
+		case "offline":
+			newsID = info.NewsID
+		default:
+			fmt.Printf("newsState %s error", info.NewsState)
+		}
+		startKey := info.Ts
+		log.Println(docID, " ", newsID, " ", startKey)
 	}
 
 	fmt.Println(itemList)

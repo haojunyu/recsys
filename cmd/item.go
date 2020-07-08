@@ -11,11 +11,11 @@ type NewsList []NewsI
 
 // NewsI 图文对象，映射成json
 type NewsI struct {
-	Itemid      int
-	Newsid      string `json:"newsid"`
-	Docid       int    `json:"docid"`
+	ItemID      int
+	NewsID      int    `json:"newsid"`
+	DocID       int    `json:"docid"`
 	Title       string `json:"title"`
-	NewState    string `json:"newsState"`
+	NewsState   string `json:"newsState"`
 	EditType    int    `json:"edit_type"`
 	Description string `json:"description"`
 	Source      int    `json:"source"`
@@ -58,6 +58,26 @@ type NewsI struct {
 	Img1           string   `json:"img1"`
 	Ts             int      `json:"ts"`
 }
+
+/*
+// UnmarshalJSON接口方法： Unmarshal使用
+func (ni *NewsI) UnmarshalJSON(data []byte) error {
+    // 这里简单演示一下，简单判断即可
+    if len(data) != 11 {
+        return fmt.Errorf("phone format error")
+    }
+    p.Value = string(data)
+    return nil
+}
+
+// UnmarshalJSON接口方法： Marshal使用
+func (ni *NewsI) MarshalJSON() (data []byte, err error) {
+    if p != nil {
+        data = []byte(p.Value)
+    }
+    return
+}
+*/
 
 // NewsM 图文数据库结构体
 type NewsM struct {
